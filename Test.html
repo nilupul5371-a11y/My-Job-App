@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Notification Test</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f4f4f9; }
+        .container { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        input { padding: 10px; width: 250px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background-color: #039be5; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0277bd; }
+        #status { margin-top: 15px; font-size: 0.9rem; color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>FCM Notification Test</h2>
+    <input type="text" id="messageInput" placeholder="පණිවිඩය මෙහි ටයිප් කරන්න...">
+    <br>
+    <button id="notifyBtn">Notification එක එවන්න</button>
+    <p id="status">අවසර පරීක්ෂා කරමින්...</p>
+</div>
+
+<script type="module">
+    // Firebase SDKs Import කිරීම
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+    // ඔබේ Configuration එක
+    const firebaseConfig = {
+        apiKey: "AIzaSyCllM0e1x-6TCt17MZ3gIrij1qAkuU7nL4",
+        authDomain: "my-job-app-52bf2.firebaseapp.com",
+        projectId: "my-job-app-52bf2",
+        storageBucket: "my-job-app-52bf2.firebasestorage.app",
+        messagingSenderId: "269752262423",
+        appId: "1:269752262423:web:ff5c167ff9a95ee89ae152",
+        measurementId: "G-ZHXT8NS3MB"
+    };
+
+    // Firebase Initialize කිරීම
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+    const statusText = document.getElementById('status');
+
+    // 1. Notification Permission ලබා ගැනීම
+    async function requestPermission() {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            statusText.innerText = "Notification අවසර ලබා දී ඇත ✅";
+            // මෙහිදී Token එක ලබාගත හැක (අවශ්‍ය නම් පමණක්)
+            const token = await getToken(messaging, { vapidKey: 'BNhoY2z1ewBBf85GLpr-3KPCGtN4oN73iBfHfByMa-Qf-nCTbxvNyb058k15ck5CqvHz433YNPBvzt9ZDM2iEB8' });
+            console.log("Device Token:", token);
+        } else {
+            statusText.innerText = "Notification අවසර ලබා දී නැත ❌";
+        }
+    }
+
+    // 2. Button එක ක්ලික් කළ විට Notification එක පෙන්වීම
+    document.getElementById('notifyBtn').addEventListener('click', () => {
+        const msg = document.getElementById('messageInput').value;
+        
+        if (!msg) {
+            alert("කරුණාකර පණිවිඩයක් ඇතුළත් කරන්න!");
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            new Notification("අලුත් පණිවිඩයක්!", {
+                body: msg,
+                icon: "https://firebase.google.com/downloads/brand-guidelines/SDK_logomark_standard.png"
+            });
+        } else {
+            requestPermission();
+        }
+    });
+
+    // පිටුව Load වන විට අවසර ඉල්ලන්න
+    requestPermission();
+</script>
+
+</body>
+</html>
