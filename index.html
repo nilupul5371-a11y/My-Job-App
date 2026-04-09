@@ -2,12 +2,12 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase Push Notification</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
-        button { background-color: #f6820d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
-        button:hover { background-color: #e67600; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        button { background-color: #f6820d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
         #status { margin-top: 15px; color: #555; font-size: 14px; }
     </style>
 </head>
@@ -15,16 +15,15 @@
 
 <div class="container">
     <h2>Firebase Web Push</h2>
-    <p>බොත්තම එබූ විට Notification එකක් ලැබෙනු ඇත.</p>
+    <p>පහත බොත්තම එබූ විට Notification එකක් ලැබෙනු ඇත.</p>
     <button id="notifyBtn">Send Notification</button>
     <div id="status">අවසර පරීක්ෂා කරමින්...</div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js";
 
-    // ඔබේ Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCllM0e1x-6TCt17MZ3gIrij1qAkuU7nL4",
         authDomain: "my-job-app-52bf2.firebaseapp.com",
@@ -41,8 +40,18 @@
     const status = document.getElementById('status');
     const btn = document.getElementById('notifyBtn');
 
-    // Token එක ලබා ගැනීම සහ අවසර ඉල්ලීම
-    async function init() {
+    // 1. Service Worker එක Register කිරීම (GitHub Pages සඳහා අත්‍යවශ්‍යයි)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./firebase-messaging-sw.js')
+        .then((registration) => {
+            console.log('Service Worker registered');
+            initNotification();
+        }).catch((err) => {
+            status.innerText = "Service Worker Register කිරීමට නොහැකි විය.";
+        });
+    }
+
+    async function initNotification() {
         try {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
@@ -52,25 +61,24 @@
                 console.log("Token:", token);
                 status.innerText = "Notification සක්‍රීයයි!";
             } else {
-                status.innerText = "Notification සඳහා අවසර නැත.";
+                status.innerText = "බ්‍රව්සරයෙන් Notification අවසර ලබා දෙන්න.";
             }
         } catch (error) {
             console.error(error);
-            status.innerText = "දෝෂයක් ඇති විය.";
+            status.innerText = "දෝෂයක් ඇති විය: " + error.message;
         }
     }
 
-    // සෘජුවම Notification එක පෙන්වීම
     btn.onclick = () => {
-        const title = "නව පණිවිඩයක්!";
-        const options = {
-            body: "ඔබේ Firebase Notification එක සාර්ථකව ක්‍රියා කරයි.",
-            icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png"
-        };
-        new Notification(title, options);
+        if (Notification.permission === 'granted') {
+            new Notification("සාර්ථකයි!", {
+                body: "ඔබේ Notification එක දැන් වැඩ කරනවා.",
+                icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png"
+            });
+        } else {
+            alert("කරුණාකර ප්‍රථමයෙන් Notification අවසර ලබා දෙන්න.");
+        }
     };
-
-    init();
 </script>
 </body>
 </html>
