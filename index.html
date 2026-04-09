@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <title>Firebase Push Notification</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; }
+        button { background-color: #f6820d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #e67600; }
+        #status { margin-top: 15px; color: #555; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Firebase Web Push</h2>
+    <p>බොත්තම එබූ විට Notification එකක් ලැබෙනු ඇත.</p>
+    <button id="notifyBtn">Send Notification</button>
+    <div id="status">අවසර පරීක්ෂා කරමින්...</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js";
+
+    // ඔබේ Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCllM0e1x-6TCt17MZ3gIrij1qAkuU7nL4",
+        authDomain: "my-job-app-52bf2.firebaseapp.com",
+        projectId: "my-job-app-52bf2",
+        storageBucket: "my-job-app-52bf2.firebasestorage.app",
+        messagingSenderId: "269752262423",
+        appId: "1:269752262423:web:ff5c167ff9a95ee89ae152",
+        measurementId: "G-ZHXT8NS3MB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    const status = document.getElementById('status');
+    const btn = document.getElementById('notifyBtn');
+
+    // Token එක ලබා ගැනීම සහ අවසර ඉල්ලීම
+    async function init() {
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                const token = await getToken(messaging, { 
+                    vapidKey: 'BNhoY2z1ewBBf85GLpr-3KPCGtN4oN73iBfHfByMa-Qf-nCTbxvNyb058k15ck5CqvHz433YNPBvzt9ZDM2iEB8' 
+                });
+                console.log("Token:", token);
+                status.innerText = "Notification සක්‍රීයයි!";
+            } else {
+                status.innerText = "Notification සඳහා අවසර නැත.";
+            }
+        } catch (error) {
+            console.error(error);
+            status.innerText = "දෝෂයක් ඇති විය.";
+        }
+    }
+
+    // සෘජුවම Notification එක පෙන්වීම
+    btn.onclick = () => {
+        const title = "නව පණිවිඩයක්!";
+        const options = {
+            body: "ඔබේ Firebase Notification එක සාර්ථකව ක්‍රියා කරයි.",
+            icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png"
+        };
+        new Notification(title, options);
+    };
+
+    init();
+</script>
+</body>
+</html>
