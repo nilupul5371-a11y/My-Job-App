@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Push Notification</title>
+    <title>Firebase Notification App</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-        button { background-color: #f6820d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        #status { margin-top: 15px; color: #555; font-size: 14px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 350px; }
+        h2 { color: #333; margin-bottom: 20px; }
+        button { background-color: #ff8c00; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+        button:hover { background-color: #e67e00; }
+        #status { margin-top: 20px; font-size: 13px; color: #666; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="card">
     <h2>Firebase Web Push</h2>
     <p>පහත බොත්තම එබූ විට Notification එකක් ලැබෙනු ඇත.</p>
     <button id="notifyBtn">Send Notification</button>
@@ -24,6 +26,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
     import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js";
 
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCllM0e1x-6TCt17MZ3gIrij1qAkuU7nL4",
         authDomain: "my-job-app-52bf2.firebaseapp.com",
@@ -37,17 +40,19 @@
     const app = initializeApp(firebaseConfig);
     const messaging = getMessaging(app);
 
-    const status = document.getElementById('status');
+    const statusDisplay = document.getElementById('status');
     const btn = document.getElementById('notifyBtn');
 
-    // 1. Service Worker එක Register කිරීම (GitHub Pages සඳහා අත්‍යවශ්‍යයි)
+    // 1. Service Worker එක Register කිරීම (404 දෝෂය මඟහැරීමට මෙය අත්‍යවශ්‍යයි)
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./firebase-messaging-sw.js')
-        .then((registration) => {
-            console.log('Service Worker registered');
-            initNotification();
-        }).catch((err) => {
-            status.innerText = "Service Worker Register කිරීමට නොහැකි විය.";
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('SW registered:', registration);
+                initNotification();
+            }).catch((err) => {
+                statusDisplay.innerText = "Service Worker දෝෂයකි: " + err.message;
+            });
         });
     }
 
@@ -58,25 +63,25 @@
                 const token = await getToken(messaging, { 
                     vapidKey: 'BNhoY2z1ewBBf85GLpr-3KPCGtN4oN73iBfHfByMa-Qf-nCTbxvNyb058k15ck5CqvHz433YNPBvzt9ZDM2iEB8' 
                 });
-                console.log("Token:", token);
-                status.innerText = "Notification සක්‍රීයයි!";
+                console.log("Device Token:", token);
+                statusDisplay.innerText = "සාර්ථකයි! Notification සක්‍රීයයි.";
             } else {
-                status.innerText = "බ්‍රව්සරයෙන් Notification අවසර ලබා දෙන්න.";
+                statusDisplay.innerText = "කරුණාකර බ්‍රව්සරයෙන් Notification වලට ඉඩ දෙන්න.";
             }
         } catch (error) {
-            console.error(error);
-            status.innerText = "දෝෂයක් ඇති විය: " + error.message;
+            statusDisplay.innerText = "දෝෂය: " + error.message;
         }
     }
 
+    // බොත්තම එබූ විට පණිවිඩයක් පෙන්වීම
     btn.onclick = () => {
         if (Notification.permission === 'granted') {
-            new Notification("සාර්ථකයි!", {
-                body: "ඔබේ Notification එක දැන් වැඩ කරනවා.",
+            new Notification("Firebase සාර්ථකයි!", {
+                body: "ඔබේ වෙබ් ඇප් එකට notification එකක් ලැබුණා.",
                 icon: "https://cdn-icons-png.flaticon.com/512/1827/1827347.png"
             });
         } else {
-            alert("කරුණාකර ප්‍රථමයෙන් Notification අවසර ලබා දෙන්න.");
+            alert("කරුණාකර Notification Permission ලබා දෙන්න.");
         }
     };
 </script>
