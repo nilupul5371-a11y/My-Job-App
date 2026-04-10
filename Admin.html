@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Job Monitor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --glass: rgba(255, 255, 255, 0.7); --border: rgba(255, 255, 255, 0.3); }
+        body { font-family: 'Segoe UI', sans-serif; background: #cfdef3; margin: 0; padding: 20px; }
+        .job-card { background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--border); padding: 15px; border-radius: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .job-desc-text { word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; flex: 1; margin-right: 10px; }
+        .status-badge { font-size: 10px; padding: 4px 8px; border-radius: 5px; font-weight: bold; text-transform: uppercase; margin-right: 5px; white-space: nowrap; }
+        .completed { background: #d4edda; color: #155724; }
+        .pending { background: #fff3cd; color: #856404; }
+        .scheduled { background: #d1ecf1; color: #0c5460; }
+        .timer-text { font-size: 11px; font-weight: bold; color: #007bff; white-space: nowrap; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; z-index:1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .detail-item { margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .detail-item b { color: #555; width: 100px; display: inline-block; }
+        .fab { position: fixed; bottom: 30px; right: 25px; background: #28a745; color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 25px; cursor: pointer; }
+        .post-btn { width: 100%; background: #007bff; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .del-btn { width: 100%; background: #dc3545; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>Admin Monitor</h2>
+    <div id="adminJobList"></div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <h3 id="detTitle">Job Details</h3>
+            <div id="detBody"></div>
+            <input type="hidden" id="deleteJobId">
+            <button class="del-btn" id="deleteBtn" onclick="deleteCompletedJob()">Delete from Firebase</button>
+            <button class="post-btn" onclick="closeDetModal()">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="m">
+        <div class="modal-content">
+            <h3>Post New Job</h3>
+            <textarea id="desc" rows="4" style="width:100%; border-radius:10px; padding:10px; margin-bottom:10px;" placeholder="Description..."></textarea>
+            <button class="post-btn" id="pBtn">Post Job</button>
+            <p onclick="document.getElementById('m').style.display='none'" style="text-align:center; color:red; cursor:pointer;">Cancel</p>
+        </div>
+    </div>
+
+    <button class="fab" onclick="document.getElementById('m').style.display='flex'"><i class="fa-solid fa-plus"></i></button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCllM0e1x-6TCt17MZ3gIrij1qAkuU7nL4",
+            authDomain: "my-job-app-52bf2.firebaseapp.com",
+            projectId: "my-job-app-52bf2",
+            appId: "1:269752262423:web:ff5c167ff9a95ee89ae152"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- SERVICE WORKER & NOTIFICATION LOGIC ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        function triggerAdminNotification(title, message) {
+            if (Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, { body: message, icon: 'https://cdn-icons-png.flaticon.com/512/190/190411.png' });
+                });
+            } else {
+                Notification.requestPermission();
+            }
+        }
+
+        onSnapshot(collection(db, "jobs"), (snap) => {
+            snap.docChanges().forEach(change => {
+                if (change.type === "modified") {
+                    const data = change.doc.data();
+                    if (data.status === "completed") {
+                        triggerAdminNotification("Job Completed!", `Job: ${data.description}\nTech: ${data.details.technician}`);
+                    }
+                }
+            });
+        });
+        // -------------------------------------------
+
+        function getTimer(ts) {
+            if(!ts) return "";
+            const diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 60) return diff + "s";
+            const mins = Math.floor(diff / 60);
+            if (mins < 60) return mins + "m";
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return hours + "h";
+            const days = Math.floor(hours / 24);
+            if (days < 7) return days + "d";
+            const weeks = Math.floor(days / 7);
+            if (weeks < 4) return weeks + "w";
+            const months = Math.floor(days / 30);
+            return months + "M";
+        }
+
+        document.getElementById('pBtn').onclick = async () => {
+            const text = document.getElementById('desc').value;
+            if(!text.trim()) return;
+            await addDoc(collection(db, "jobs"), { description: text, status: "pending", createdAt: Date.now() });
+            document.getElementById('desc').value = '';
+            document.getElementById('m').style.display = 'none';
+        };
+
+        onSnapshot(query(collection(db, "jobs"), orderBy("createdAt", "desc")), (snap) => {
+            const list = document.getElementById('adminJobList');
+            list.innerHTML = '';
+            snap.forEach(d => {
+                const data = d.data();
+                const timer = data.status === 'pending' ? `<span class="timer-text" data-ts="${data.createdAt}">${getTimer(data.createdAt)}</span>` : '';
+                const card = document.createElement('div');
+                card.className = 'job-card';
+                card.onclick = () => showDetails(d.id, data);
+                card.innerHTML = `<span class="job-desc-text">${data.description}</span><div style="display:flex; align-items:center;"><span class="status-badge ${data.status}">${data.status}</span>${timer}</div>`;
+                list.appendChild(card);
+            });
+        });
+
+        window.showDetails = (id, data) => {
+            const body = document.getElementById('detBody');
+            const delBtn = document.getElementById('deleteBtn');
+            document.getElementById('deleteJobId').value = id;
+            
+            if((data.status === 'completed' || data.status === 'scheduled') && data.details) {
+                let html = data.status === 'scheduled' ? `<div class="detail-item" style="color:blue"><b>Planned Date:</b> ${data.scheduledDate}</div>` : '';
+                html += `
+                    <div class="detail-item"><b>1. Location:</b> ${data.details.location}</div>
+                    <div class="detail-item"><b>2. Item Code:</b> ${data.details.itemCode}</div>
+                    <div class="detail-item"><b>3. Brand:</b> ${data.details.brand}</div>
+                    <div class="detail-item"><b>4. Model:</b> ${data.details.model}</div>
+                    <div class="detail-item"><b>5. S/N:</b> ${data.details.sn}</div>
+                    <div class="detail-item"><b>6. Description:</b> ${data.details.description}</div>
+                    <div class="detail-item"><b>7. Technician:</b> ${data.details.technician}</div>`;
+                body.innerHTML = html;
+                delBtn.style.display = data.status === 'completed' ? 'block' : 'none';
+            } else {
+                body.innerHTML = `<p>No details added yet. Status: <b>${data.status}</b></p>`;
+                delBtn.style.display = 'none';
+            }
+            document.getElementById('detailModal').style.display = 'flex';
+        };
+
+        window.deleteCompletedJob = async () => {
+            const id = document.getElementById('deleteJobId').value;
+            if(confirm("Delete this job?")) { await deleteDoc(doc(db, "jobs", id)); closeDetModal(); }
+        };
+
+        window.closeDetModal = () => document.getElementById('detailModal').style.display = 'none';
+        setInterval(() => { document.querySelectorAll('.timer-text').forEach(el => { el.innerText = getTimer(parseInt(el.dataset.ts)); }); }, 1000);
+    </script>
+</body>
+</html>
