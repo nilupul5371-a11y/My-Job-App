@@ -2,7 +2,7 @@
   "name": "User - Job Monitor System",
   "short_name": "Job User",
   "description": "User panel to view and complete assigned jobs.",
-  "start_url": "https://nilupul5371-a11y.github.io/My-Job-App/user.html",
+  "start_url": "user.html",
   "display": "minimal-ui",
   "background_color": "#e0eafc",
   "theme_color": "#007bff",
