@@ -3,7 +3,7 @@
   "short_name": "Job User",
   "description": "User panel to view and complete assigned jobs.",
   "start_url": "https://nilupul5371-a11y.github.io/My-Job-App/user.html",
-  "display": "standalone",
+  "display": "minimal-ui",
   "background_color": "#e0eafc",
   "theme_color": "#007bff",
   "icons": [
