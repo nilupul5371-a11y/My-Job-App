@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Panel</title>
+    <link rel="manifest" href="manifest-user.json">
     <style>
         :root { --glass: rgba(255, 255, 255, 0.7); --border: rgba(255, 255, 255, 0.3); }
         body { font-family: 'Segoe UI', sans-serif; background: #e0eafc; margin: 0; padding: 20px; }
@@ -73,7 +74,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- SERVICE WORKER & NOTIFICATION LOGIC ---
+        // Service Worker & Background Notifications
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
@@ -81,7 +82,11 @@
         function triggerUserNotification(title, message) {
             if (Notification.permission === 'granted') {
                 navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(title, { body: message, icon: 'https://cdn-icons-png.flaticon.com/512/564/564619.png' });
+                    reg.showNotification(title, { 
+                        body: message, 
+                        icon: 'https://cdn-icons-png.flaticon.com/512/1157/1157000.png',
+                        vibrate: [200, 100, 200]
+                    });
                 });
             } else {
                 Notification.requestPermission();
@@ -98,7 +103,6 @@
                 }
             });
         });
-        // -------------------------------------------
 
         function getTimer(ts) {
             if(!ts) return "";
