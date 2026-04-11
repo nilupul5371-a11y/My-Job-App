@@ -3,7 +3,7 @@
   "short_name": "Job Admin",
   "description": "Admin panel to post and monitor maintenance jobs.",
   "start_url": "https://nilupul5371-a11y.github.io/My-Job-App/admin.html", 
-  "display": "standalone",
+  "display": "minimal-ui",
   "background_color": "#cfdef3",
   "theme_color": "#28a745",
   "icons": [
