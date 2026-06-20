@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAESTRO QUICINE - Management System</title>
-    <!-- Icons සඳහා Font Awesome ලින්ක් එක -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -69,7 +68,7 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 600px;
+            max-width: 650px; /* බටන් 3ක් ඇති බැවින් උපරිම පළල පොඩ්ඩක් වැඩි කරන ලදී */
             text-align: center;
         }
 
@@ -94,7 +93,7 @@
             align-items: center;
             justify-content: center;
             padding: 30px 20px;
-            font-size: 18px;
+            font-size: 16px; /* බටන් 3ක් පේළියට හැඩගැස්වීමට ෆොන්ට් එක සුළු වශයෙන් සකසන ලදී */
             font-weight: 600;
             color: #ffffff;
             text-decoration: none;
@@ -127,6 +126,18 @@
             background: linear-gradient(135deg, #f39c12, var(--accent-color));
         }
 
+        /* Water Filter Button Style */
+        .btn-filter {
+            background: linear-gradient(135deg, #16a085, #1abc9c);
+            border-bottom: 5px solid #117a65;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(22, 160, 133, 0.3);
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+        }
+
         /* Button Icons */
         .dashboard-btn i {
             font-size: 32px;
@@ -144,7 +155,7 @@
         }
 
         /* Responsive Settings for Mobile Phones */
-        @media (max-width: 550px) {
+        @media (max-width: 600px) {
             header h1 { font-size: 20px; }
             header p { font-size: 12px; }
             
@@ -173,25 +184,26 @@
 </head>
 <body>
 
-    <!-- Professional Header -->
     <header>
         <h1>MAESTRO QUICINE - <span>KITCHEN EQUIPMENT</span></h1>
         <p>Internal Management Dashboard</p>
     </header>
 
-    <!-- Main Content Area -->
     <div class="main-container">
         <div class="menu-box">
             <h2>Select Operations Department</h2>
             
             <div class="button-grid">
-                <!-- Pending Jobs Button -->
                 <a href="admin.html" class="dashboard-btn btn-pending">
                     <i class="fa-solid fa-clock-history"></i>
                     Pending Jobs
                 </a>
                 
-                <!-- Spare Parts Button -->
+                <a href="pending_jobs.html" class="dashboard-btn btn-filter">
+                    <i class="fa-solid fa-faucet-drip"></i>
+                    Water Filter Service
+                </a>
+                
                 <a href="Parts.html" class="dashboard-btn btn-parts">
                     <i class="fa-solid fa-gears"></i>
                     Spare Parts
@@ -200,7 +212,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         &copy; 2026 MAESTRO CUISINE. All Rights Reserved.
     </footer>
