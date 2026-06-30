@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Firebase Job App</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 360px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.2s;
+            background-color: #f9fafb;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        button.btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 11px;
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-google:hover {
+            background-color: #f9fafb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .divider {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 20px;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 16px;
+        }
+
+        .profile-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px 16px;
+            margin: 16px 0;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* --- Home Header Layout --- */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .welcome-box {
+            text-align: right;
+        }
+
+        .welcome-text {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .user-display-name {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 700;
+            margin: 2px 0 0 0;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Profile Page Header Styles */
+        .profile-image-container {
+            position: relative;
+            width: 85px;
+            height: 85px;
+            margin: 0 auto 15px auto;
+            cursor: pointer;
+        }
+        .profile-image-center {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            overflow: hidden;
+            transition: opacity 0.2s;
+        }
+        .profile-image-center img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-image-container:hover .profile-image-center {
+            opacity: 0.8;
+        }
+        /* කැමරා අයිකනයක් පෙන්වීමට */
+        .upload-overlay {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .label-text {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            margin-top: 10px;
+        }
+        .static-email {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            background: #f3f4f6;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div id="registerPage" class="page active">
+        <h2>Create Account</h2>
+        <div class="subtitle">Get started with your profile</div>
+        
+        <input type="text" id="regName" placeholder="Full Name" required>
+        <input type="email" id="regEmail" placeholder="Email Address" required>
+        <input type="password" id="regPassword" placeholder="Password" required>
+        <button id="btnRegister" class="btn-primary">Sign Up</button>
+        
+        <div class="divider">or</div>
+        
+        <button class="btn-google btnRegisterGoogle">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.33 0 3.353 2.682 1.414 6.593l3.852 3.172z"/><path fill="#4285F4" d="M23.49 12.275c0-.818-.073-1.609-.21-2.373H12v4.491h6.445c-.277 1.464-1.105 2.705-2.345 3.54l3.654 2.833c2.136-1.973 3.373-4.873 3.373-8.491z"/><path fill="#FBBC05" d="M5.266 14.235L1.414 17.41A11.947 11.947 0 0 0 12 24c3.055 0 5.864-1.009 8.009-2.736l-3.655-2.832c-1.118.755-2.545 1.205-4.354 1.205-3.69 0-6.81-2.491-7.923-5.918z"/><path fill="#34A853" d="M1.414 6.593A11.928 11.928 0 0 0 0 12c0 1.95.468 3.79 1.295 5.423l4.005-3.114A7.013 7.013 0 0 1 4.91 12c0-1.005.214-1.96.595-2.827L1.414 6.593z"/></svg>
+            Sign up with Google
+        </button>
+
+        <p>Already have an account? <a onclick="showPage('loginPage')">Login</a></p>
+    </div>
+
+    <div id="loginPage" class="page">
+        <h2>Welcome Back</h2>
+        <div class="subtitle">Log in to your account</div>
+        
+        <input type="email" id="loginEmail" placeholder="Email Address" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button id="btnLogin" class="btn-primary">Log In</button>
+        
+        <div class="divider">or</div>
+        
+        <button class="btn-google btnLoginGoogle">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.33 0 3.353 2.682 1.414 6.593l3.852 3.172z"/><path fill="#4285F4" d="M23.49 12.275c0-.818-.073-1.609-.21-2.373H12v4.491h6.445c-.277 1.464-1.105 2.705-2.345 3.54l3.654 2.833c2.136-1.973 3.373-4.873 3.373-8.491z"/><path fill="#FBBC05" d="M5.266 14.235L1.414 17.41A11.947 11.947 0 0 0 12 24c3.055 0 5.864-1.009 8.009-2.736l-3.655-2.832c-1.118.755-2.545 1.205-4.354 1.205-3.69 0-6.81-2.491-7.923-5.918z"/><path fill="#34A853" d="M1.414 6.593A11.928 11.928 0 0 0 0 12c0 1.95.468 3.79 1.295 5.423l4.005-3.114A7.013 7.013 0 0 1 4.91 12c0-1.005.214-1.96.595-2.827L1.414 6.593z"/></svg>
+            Sign in with Google
+        </button>
+
+        <p>Don't have an account? <a onclick="showPage('registerPage')">Register</a></p>
+    </div>
+
+    <div id="homePage" class="page">
+        <div class="home-header">
+            <div class="user-avatar" onclick="showPage('profilePage')">
+                <img id="homeUserAvatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+            </div>
+            <div class="welcome-box">
+                <p class="welcome-text">Welcome Back</p>
+                <p class="user-display-name" id="homeUserName">User</p>
+            </div>
+        </div>
+
+        <h2>Dashboard</h2>
+        <div class="subtitle">Welcome to your home page</div>
+        <p style="background: #e0e7ff; color: #4338ca; padding: 12px; border-radius: 8px; font-weight: 500;">
+            ඔබ සාර්ථකව පද්ධතියට ඇතුල් වුණා!
+        </p>
+        
+        <div class="nav-links">
+            <a id="btnLogoutHome" style="color: #ef4444;">Logout</a>
+        </div>
+    </div>
+
+    <div id="profilePage" class="page">
+        <h2>User Profile</h2>
+        <div class="subtitle">Update your personal profile information</div>
+        
+        <div class="profile-image-container" onclick="document.getElementById('fileInput').click();">
+            <div class="profile-image-center">
+                <img id="profileUserAvatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Image">
+            </div>
+            <div class="upload-overlay">📷</div>
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+        <div class="profile-card">
+            <div class="label-text">Email Address (Cannot change)</div>
+            <div id="userEmail" class="static-email">Loading...</div>
+
+            <div class="label-text">Full Name</div>
+            <input type="text" id="profileName" placeholder="Your Full Name">
+            
+            <button id="btnUpdateProfile" class="btn-primary" style="margin-top: 15px;">Save Changes</button>
+        </div>
+
+        <div class="nav-links">
+            <a onclick="showPage('homePage')">Back to Home</a>
+            <a id="btnLogoutProfile" style="color: #ef4444;">Logout</a>
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCllM0e1x-6TCt17MZ3gIrij1qAkuU7nL4",
+        authDomain: "my-job-app-52bf2.firebaseapp.com",
+        projectId: "my-job-app-52bf2",
+        storageBucket: "my-job-app-52bf2.firebasestorage.app",
+        messagingSenderId: "269752262423",
+        appId: "1:269752262423:web:ff5c167ff9a95ee89ae152",
+        measurementId: "G-ZHXT8NS3MB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    let selectedImageBase64 = ""; // තෝරාගන්නා පින්තූරයේ දත්ත තබා ගැනීමට
+
+    window.showPage = function(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    // --- FILE SELECTION LOGIC (නව එකතු කිරීම) ---
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                selectedImageBase64 = event.target.result; // පින්තූරය Base64 string එකක් බවට පත් කරයි
+                document.getElementById('profileUserAvatar').src = selectedImageBase64; // Profile පිටුවේ පින්තූරය Preview කරයි
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // --- 1) EMAIL REGISTER ---
+    document.getElementById('btnRegister').addEventListener('click', () => {
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+
+        if(!name) { alert("Please enter your name"); return; }
+
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                updateProfile(userCredential.user, {
+                    displayName: name
+                }).then(() => {
+                    showPage('homePage');
+                });
+            })
+            .catch((error) => { alert("Error: " + error.message); });
+    });
+
+    // --- 2) EMAIL LOGIN ---
+    document.getElementById('btnLogin').addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        signInWithEmailAndPassword(auth, email, password)
+            .then(() => { showPage('homePage'); })
+            .catch((error) => { alert("Error: " + error.message); });
+    });
+
+    // --- 3) GOOGLE SIGN-IN LOGIC ---
+    const loginWithGoogle = () => {
+        signInWithPopup(auth, googleProvider)
+            .then((result) => {
+                showPage('homePage');
+            })
+            .catch((error) => {
+                alert("Google Sign-In Error: " + error.message);
+            });
+    };
+
+    document.querySelectorAll('.btn-google').forEach(button => {
+        button.addEventListener('click', loginWithGoogle);
+    });
+
+    // --- PROFILE UPDATE LOGIC (නවීකරණය කරන ලදි) ---
+    document.getElementById('btnUpdateProfile').addEventListener('click', () => {
+        const currentUser = auth.currentUser;
+        const updatedName = document.getElementById('profileName').value;
+
+        if(currentUser) {
+            // පින්තූරයක් තෝරාගෙන තිබේ නම් එයද, නැතහොත් කලින් තිබූ පින්තූරයද උපයෝගී කරගනී
+            const finalPhotoURL = selectedImageBase64 ? selectedImageBase64 : currentUser.photoURL;
+
+            updateProfile(currentUser, {
+                displayName: updatedName,
+                photoURL: finalPhotoURL
+            }).then(() => {
+                alert("Profile Updated Successfully!");
+                document.getElementById('homeUserName').innerText = updatedName;
+                if(finalPhotoURL) {
+                    document.getElementById('homeUserAvatar').src = finalPhotoURL;
+                    document.getElementById('profileUserAvatar').src = finalPhotoURL;
+                }
+                showPage('homePage');
+            }).catch((error) => {
+                alert("Error updating profile: " + error.message);
+            });
+        }
+    });
+
+    // --- 4) LOGOUT LOGIC ---
+    const handleLogout = () => {
+        signOut(auth).then(() => {
+            showPage('loginPage');
+        }).catch((error) => {
+            alert("Error logging out: " + error.message);
+        });
+    };
+
+    document.getElementById('btnLogoutHome').addEventListener('click', handleLogout);
+    document.getElementById('btnLogoutProfile').addEventListener('click', handleLogout);
+
+    // --- 5) AUTH STATE OBSERVER ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('userEmail').innerText = user.email;
+            document.getElementById('profileName').value = user.displayName ? user.displayName : "";
+
+            document.getElementById('homeUserName').innerText = user.displayName ? user.displayName : user.email.split('@')[0];
+            
+            const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            document.getElementById('homeUserAvatar').src = user.photoURL ? user.photoURL : defaultAvatar;
+            document.getElementById('profileUserAvatar').src = user.photoURL ? user.photoURL : defaultAvatar;
+
+            if(document.getElementById('loginPage').classList.contains('active') || document.getElementById('registerPage').classList.contains('active')) {
+                showPage('homePage');
+            }
+        } else {
+            showPage('loginPage');
+            selectedImageBase64 = ""; // Logout වීමේදී දත්ත ඉවත් කරයි
+        }
+    });
+</script>
+
+</body>
+</html>
